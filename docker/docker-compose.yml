@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+      args:
+        BUILD_ENV: production
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongo:27017/myfoodapi
+    volumes:
+      - ../:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    profiles:
+      - production
+
+  app-dev:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+      args:
+        BUILD_ENV: development
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/myfoodapi
+    volumes:
+      - ../:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    command: npm run dev
+    profiles:
+      - development
+
+  mongo:
+    image: mongo:6
+    container_name: my-food-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
+volumes:
+  mongo-data:
